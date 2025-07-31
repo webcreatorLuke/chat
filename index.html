@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatApp - Discord Clone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #36393f;
+            color: #dcddde;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Server Sidebar */
+        .server-list {
+            width: 72px;
+            background: #202225;
+            padding: 12px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .server-icon {
+            width: 48px;
+            height: 48px;
+            background: #5865f2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .server-icon:hover {
+            border-radius: 16px;
+            background: #7289da;
+        }
+
+        .server-icon.active {
+            border-radius: 16px;
+            background: #7289da;
+        }
+
+        /* Channel Sidebar */
+        .channel-sidebar {
+            width: 240px;
+            background: #2f3136;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .server-header {
+            height: 48px;
+            padding: 0 16px;
+            border-bottom: 1px solid #202225;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            background: #2f3136;
+        }
+
+        .channels {
+            flex: 1;
+            padding: 16px 8px;
+            overflow-y: auto;
+        }
+
+        .channel-category {
+            margin-bottom: 16px;
+        }
+
+        .category-header {
+            color: #8e9297;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            padding: 0 8px;
+        }
+
+        .channel {
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 2px;
+            transition: background 0.2s;
+        }
+
+        .channel:hover {
+            background: #393c43;
+        }
+
+        .channel.active {
+            background: #42464d;
+            color: #ffffff;
+        }
+
+        .channel-icon {
+            color: #8e9297;
+            font-size: 16px;
+        }
+
+        .user-area {
+            height: 52px;
+            background: #292b2f;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-top: 1px solid #202225;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .username {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: #8e9297;
+        }
+
+        /* Main Chat Area */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #36393f;
+        }
+
+        .chat-header {
+            height: 48px;
+            padding: 0 16px;
+            border-bottom: 1px solid #202225;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #36393f;
+        }
+
+        .channel-hash {
+            color: #8e9297;
+            font-size: 20px;
+        }
+
+        .channel-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            gap: 16px;
+            padding: 4px 0;
+            transition: background 0.2s;
+        }
+
+        .message:hover {
+            background: rgba(4, 4, 5, 0.07);
+            margin: 0 -16px;
+            padding: 4px 16px;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .message-author {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .message-timestamp {
+            font-size: 12px;
+            color: #8e9297;
+        }
+
+        .message-text {
+            line-height: 1.375;
+            font-size: 16px;
+        }
+
+        .chat-input-container {
+            padding: 16px;
+            background: #36393f;
+        }
+
+        .chat-input {
+            width: 100%;
+            background: #40444b;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #dcddde;
+            font-size: 16px;
+            resize: none;
+            min-height: 44px;
+            max-height: 200px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            background: #484c57;
+        }
+
+        .chat-input::placeholder {
+            color: #72767d;
+        }
+
+        /* Login Modal */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-form {
+            background: #36393f;
+            padding: 32px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90vw;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .login-subtitle {
+            color: #8e9297;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .auth-toggle {
+            display: flex;
+            margin-bottom: 24px;
+            background: #202225;
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 8px 16px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-weight: 500;
+            color: #8e9297;
+        }
+
+        .auth-tab.active {
+            background: #5865f2;
+            color: white;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 16px;
+            color: #8e9297;
+            font-size: 14px;
+        }
+
+        .auth-link {
+            color: #5865f2;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #f04747;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            background: #3ba55d;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .login-button:disabled {
+            background: #4f545c;
+            cursor: not-allowed;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #8e9297;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: #202225;
+            border: 1px solid #202225;
+            border-radius: 4px;
+            padding: 12px;
+            color: #dcddde;
+            font-size: 16px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #5865f2;
+        }
+
+        .login-button {
+            width: 100%;
+            background: #5865f2;
+            border: none;
+            border-radius: 4px;
+            padding: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .login-button:hover {
+            background: #4752c4;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #202225;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2f3136;
+        }
+
+        .online-indicator {
+            width: 12px;
+            height: 12px;
+            background: #3ba55d;
+            border-radius: 50%;
+            border: 2px solid #2f3136;
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+        }
+
+        .user-avatar {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-modal" id="loginModal">
+        <div class="login-form">
+            <h2 class="login-title" id="authTitle">Welcome back!</h2>
+            <p class="login-subtitle" id="authSubtitle">We're so excited to see you again!</p>
+            
+            <div class="auth-toggle">
+                <div class="auth-tab active" id="loginTab">Login</div>
+                <div class="auth-tab" id="registerTab">Register</div>
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+            
+            <form id="authForm">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-input" id="usernameInput" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group" id="emailGroup" style="display: none;">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="emailInput" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="passwordInput" placeholder="Enter your password" required>
+                </div>
+                <div class="form-group" id="confirmPasswordGroup" style="display: none;">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" class="form-input" id="confirmPasswordInput" placeholder="Confirm your password">
+                </div>
+                <button type="submit" class="login-button" id="authButton">Login</button>
+            </form>
+            
+            <div class="auth-switch">
+                <span id="authSwitchText">Need an account?</span>
+                <a class="auth-link" id="authSwitchLink">Register</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <div class="server-list">
+            <div class="server-icon active">C</div>
+            <div class="server-icon">G</div>
+            <div class="server-icon">+</div>
+        </div>
+
+        <div class="channel-sidebar">
+            <div class="server-header">
+                <span>ChatApp Server</span>
+            </div>
+            
+            <div class="channels">
+                <div class="channel-category">
+                    <div class="category-header">Text Channels</div>
+                    <div class="channel active" data-channel="general">
+                        <span class="channel-icon">#</span>
+                        <span>general</span>
+                    </div>
+                    <div class="channel" data-channel="random">
+                        <span class="channel-icon">#</span>
+                        <span>random</span>
+                    </div>
+                    <div class="channel" data-channel="gaming">
+                        <span class="channel-icon">#</span>
+                        <span>gaming</span>
+                    </div>
+                </div>
+                
+                <div class="channel-category">
+                    <div class="category-header">Voice Channels</div>
+                    <div class="channel">
+                        <span class="channel-icon">🔊</span>
+                        <span>General Voice</span>
+                    </div>
+                    <div class="channel">
+                        <span class="channel-icon">🔊</span>
+                        <span>Gaming Voice</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-area">
+                <div class="user-avatar">
+                    <span id="userInitial">U</span>
+                    <div class="online-indicator"></div>
+                </div>
+                <div class="user-info">
+                    <div class="username" id="currentUsername">User</div>
+                    <div class="user-status">Online</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-header">
+                <span class="channel-hash">#</span>
+                <span class="channel-name" id="currentChannelName">general</span>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will be dynamically added here -->
+            </div>
+
+            <div class="chat-input-container">
+                <textarea class="chat-input" id="messageInput" placeholder="Message #general" rows="1"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ChatApp {
+            constructor() {
+                this.currentUser = null;
+                this.currentChannel = 'general';
+                this.isLoginMode = true;
+                this.users = {
+                    // Add some demo users for testing
+                    'demo': {
+                        email: 'demo@example.com',
+                        password: 'demo123',
+                        avatar: 'D'
+                    },
+                    'admin': {
+                        email: 'admin@chatapp.com',
+                        password: 'admin123',
+                        avatar: 'A'
+                    }
+                };
+                this.messages = {
+                    general: [
+                        {
+                            id: 1,
+                            author: 'ChatBot',
+                            content: 'Welcome to ChatApp! This is the beginning of the #general channel.',
+                            timestamp: new Date(Date.now() - 3600000),
+                            avatar: 'CB'
+                        },
+                        {
+                            id: 2,
+                            author: 'Admin',
+                            content: 'Feel free to chat and explore the different channels!',
+                            timestamp: new Date(Date.now() - 1800000),
+                            avatar: 'A'
+                        }
+                    ],
+                    random: [
+                        {
+                            id: 3,
+                            author: 'ChatBot',
+                            content: 'This is the #random channel - talk about anything here!',
+                            timestamp: new Date(Date.now() - 7200000),
+                            avatar: 'CB'
+                        }
+                    ],
+                    gaming: [
+                        {
+                            id: 4,
+                            author: 'Gamer',
+                            content: 'Anyone up for some multiplayer games?',
+                            timestamp: new Date(Date.now() - 900000),
+                            avatar: 'G'
+                        }
+                    ]
+                };
+                
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.displayMessages();
+            }
+
+            bindEvents() {
+                // Auth form
+                const authForm = document.getElementById('authForm');
+                const authButton = document.getElementById('authButton');
+                
+                authForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    console.log('Form submitted, isLoginMode:', this.isLoginMode);
+                    if (this.isLoginMode) {
+                        this.handleLogin();
+                    } else {
+                        this.handleRegister();
+                    }
+                });
+
+                // Also handle direct button clicks
+                authButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Button clicked, isLoginMode:', this.isLoginMode);
+                    if (this.isLoginMode) {
+                        this.handleLogin();
+                    } else {
+                        this.handleRegister();
+                    }
+                });
+
+                // Auth toggle tabs
+                document.getElementById('loginTab').addEventListener('click', () => {
+                    console.log('Switching to login');
+                    this.switchToLogin();
+                });
+                
+                document.getElementById('registerTab').addEventListener('click', () => {
+                    console.log('Switching to register');
+                    this.switchToRegister();
+                });
+
+                // Auth switch link
+                document.getElementById('authSwitchLink').addEventListener('click', () => {
+                    if (this.isLoginMode) {
+                        this.switchToRegister();
+                    } else {
+                        this.switchToLogin();
+                    }
+                });
+
+                // Channel switching
+                document.querySelectorAll('.channel[data-channel]').forEach(channel => {
+                    channel.addEventListener('click', () => {
+                        const channelName = channel.dataset.channel;
+                        this.switchChannel(channelName);
+                    });
+                });
+
+                // Message input
+                const messageInput = document.getElementById('messageInput');
+                messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                // Auto-resize textarea
+                messageInput.addEventListener('input', () => {
+                    messageInput.style.height = 'auto';
+                    messageInput.style.height = Math.min(messageInput.scrollHeight, 200) + 'px';
+                });
+            }
+
+            switchToLogin() {
+                this.isLoginMode = true;
+                this.hideMessages();
+                document.getElementById('loginTab').classList.add('active');
+                document.getElementById('registerTab').classList.remove('active');
+                document.getElementById('authTitle').textContent = 'Welcome back!';
+                document.getElementById('authSubtitle').textContent = "We're so excited to see you again!";
+                document.getElementById('authButton').textContent = 'Login';
+                document.getElementById('authSwitchText').textContent = 'Need an account?';
+                document.getElementById('authSwitchLink').textContent = 'Register';
+                document.getElementById('emailGroup').style.display = 'none';
+                document.getElementById('confirmPasswordGroup').style.display = 'none';
+                document.getElementById('emailInput').required = false;
+                document.getElementById('confirmPasswordInput').required = false;
+                document.getElementById('authForm').reset();
+            }
+
+            switchToRegister() {
+                this.isLoginMode = false;
+                this.hideMessages();
+                document.getElementById('registerTab').classList.add('active');
+                document.getElementById('loginTab').classList.remove('active');
+                document.getElementById('authTitle').textContent = 'Create an account';
+                document.getElementById('authSubtitle').textContent = "Join the community and start chatting!";
+                document.getElementById('authButton').textContent = 'Create Account';
+                document.getElementById('authSwitchText').textContent = 'Already have an account?';
+                document.getElementById('authSwitchLink').textContent = 'Login';
+                document.getElementById('emailGroup').style.display = 'block';
+                document.getElementById('confirmPasswordGroup').style.display = 'block';
+                document.getElementById('emailInput').required = true;
+                document.getElementById('confirmPasswordInput').required = true;
+                document.getElementById('authForm').reset();
+            }
+
+            showError(message) {
+                const errorEl = document.getElementById('errorMessage');
+                const successEl = document.getElementById('successMessage');
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+                successEl.style.display = 'none';
+            }
+
+            showSuccess(message) {
+                const errorEl = document.getElementById('errorMessage');
+                const successEl = document.getElementById('successMessage');
+                successEl.textContent = message;
+                successEl.style.display = 'block';
+                errorEl.style.display = 'none';
+            }
+
+            hideMessages() {
+                document.getElementById('errorMessage').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'none';
+            }
+
+            validateEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
+            validatePassword(password) {
+                return password.length >= 6;
+            }
+
+            handleLogin() {
+                console.log('handleLogin called');
+                const username = document.getElementById('usernameInput').value.trim();
+                const password = document.getElementById('passwordInput').value;
+                
+                console.log('Username:', username, 'Password:', password);
+                console.log('Available users:', Object.keys(this.users));
+                
+                if (!username || !password) {
+                    this.showError('Please fill in all fields');
+                    return;
+                }
+
+                // Check if user exists and password matches
+                if (this.users[username]) {
+                    console.log('User found:', this.users[username]);
+                    if (this.users[username].password === password) {
+                        this.showSuccess('Login successful!');
+                        setTimeout(() => {
+                            this.loginUser(username);
+                        }, 500); // Reduced delay
+                    } else {
+                        this.showError('Invalid password');
+                    }
+                } else {
+                    this.showError('Username not found. Try: demo/demo123 or admin/admin123');
+                }
+            }
+
+            handleRegister() {
+                console.log('handleRegister called');
+                const username = document.getElementById('usernameInput').value.trim();
+                const email = document.getElementById('emailInput').value.trim();
+                const password = document.getElementById('passwordInput').value;
+                const confirmPassword = document.getElementById('confirmPasswordInput').value;
+                
+                console.log('Registration data:', {username, email, password, confirmPassword});
+                
+                // Validation
+                if (!username || !email || !password || !confirmPassword) {
+                    this.showError('Please fill in all fields');
+                    return;
+                }
+
+                if (username.length < 3) {
+                    this.showError('Username must be at least 3 characters long');
+                    return;
+                }
+
+                if (!this.validateEmail(email)) {
+                    this.showError('Please enter a valid email address');
+                    return;
+                }
+
+                if (!this.validatePassword(password)) {
+                    this.showError('Password must be at least 6 characters long');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    this.showError('Passwords do not match');
+                    return;
+                }
+
+                if (this.users[username]) {
+                    this.showError('Username already exists');
+                    return;
+                }
+
+                // Register new user
+                this.users[username] = {
+                    email: email,
+                    password: password,
+                    avatar: username.charAt(0).toUpperCase()
+                };
+
+                console.log('User registered:', this.users[username]);
+                this.showSuccess('Account created successfully!');
+                setTimeout(() => {
+                    this.loginUser(username);
+                }, 500); // Reduced delay
+            }
+
+            loginUser(username) {
+                console.log('loginUser called with:', username);
+                this.currentUser = {
+                    username: username,
+                    avatar: this.users[username] ? this.users[username].avatar : username.charAt(0).toUpperCase()
+                };
+                
+                console.log('Current user set to:', this.currentUser);
+                
+                document.getElementById('currentUsername').textContent = username;
+                document.getElementById('userInitial').textContent = this.currentUser.avatar;
+                
+                // Hide the login modal
+                const loginModal = document.getElementById('loginModal');
+                loginModal.style.display = 'none';
+                console.log('Login modal hidden');
+                
+                // Clear form
+                document.getElementById('authForm').reset();
+                
+                // Update placeholder
+                document.getElementById('messageInput').placeholder = `Message #${this.currentChannel}`;
+                
+                // Add welcome message
+                const welcomeMessage = {
+                    id: Date.now(),
+                    author: 'ChatBot',
+                    content: `Welcome to ChatApp, ${username}! 🎉`,
+                    timestamp: new Date(),
+                    avatar: 'CB'
+                };
+                
+                if (!this.messages[this.currentChannel]) {
+                    this.messages[this.currentChannel] = [];
+                }
+                
+                this.messages[this.currentChannel].push(welcomeMessage);
+                this.displayMessages();
+                
+                console.log('Login completed successfully');
+            }
+
+            switchChannel(channelName) {
+                // Update active channel
+                document.querySelectorAll('.channel[data-channel]').forEach(ch => {
+                    ch.classList.remove('active');
+                });
+                document.querySelector(`[data-channel="${channelName}"]`).classList.add('active');
+                
+                this.currentChannel = channelName;
+                document.getElementById('currentChannelName').textContent = channelName;
+                document.getElementById('messageInput').placeholder = `Message #${channelName}`;
+                
+                this.displayMessages();
+            }
+
+            sendMessage() {
+                const messageInput = document.getElementById('messageInput');
+                const content = messageInput.value.trim();
+                
+                if (!content || !this.currentUser) return;
+
+                const message = {
+                    id: Date.now(),
+                    author: this.currentUser.username,
+                    content: content,
+                    timestamp: new Date(),
+                    avatar: this.currentUser.avatar
+                };
+
+                if (!this.messages[this.currentChannel]) {
+                    this.messages[this.currentChannel] = [];
+                }
+                
+                this.messages[this.currentChannel].push(message);
+                this.displayMessages();
+                
+                messageInput.value = '';
+                messageInput.style.height = '44px';
+            }
+
+            displayMessages() {
+                const messagesContainer = document.getElementById('chatMessages');
+                const channelMessages = this.messages[this.currentChannel] || [];
+                
+                messagesContainer.innerHTML = '';
+                
+                channelMessages.forEach(message => {
+                    const messageEl = this.createMessageElement(message);
+                    messagesContainer.appendChild(messageEl);
+                });
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            createMessageElement(message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                avatar.textContent = message.avatar;
+                
+                const content = document.createElement('div');
+                content.className = 'message-content';
+                
+                const header = document.createElement('div');
+                header.className = 'message-header';
+                
+                const author = document.createElement('span');
+                author.className = 'message-author';
+                author.textContent = message.author;
+                
+                const timestamp = document.createElement('span');
+                timestamp.className = 'message-timestamp';
+                timestamp.textContent = this.formatTimestamp(message.timestamp);
+                
+                const text = document.createElement('div');
+                text.className = 'message-text';
+                text.textContent = message.content;
+                
+                header.appendChild(author);
+                header.appendChild(timestamp);
+                content.appendChild(header);
+                content.appendChild(text);
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(content);
+                
+                return messageDiv;
+            }
+
+            formatTimestamp(date) {
+                const now = new Date();
+                const isToday = date.toDateString() === now.toDateString();
+                
+                if (isToday) {
+                    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                } else {
+                    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+            }
+        }
+
+        // Initialize the app
+        const app = new ChatApp();
+    </script>
+</body>
+</html>
